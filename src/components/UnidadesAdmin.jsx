@@ -8,7 +8,15 @@ export default function UnidadesAdmin() {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ id: null, nombre: '', descripcion: '', orden: 1 });
 
-  const cargar = () => api.get('unidades/').then(res => setUnidades(res.data)).catch(console.error);
+  const cargar = () => {
+    api.get('unidades/')
+      .then(res => {
+        // Maneja tanto si viene paginado ({ results: [...] }) como si viene plano ([...])
+        const dataList = Array.isArray(res.data) ? res.data : (res.data.results || []);
+        setUnidades(dataList);
+      })
+      .catch(console.error);
+  };
 
   useEffect(() => { cargar(); }, []);
 
@@ -53,7 +61,7 @@ export default function UnidadesAdmin() {
       </div>
 
       <div className="space-y-3">
-        {unidades.map((u) => (
+        {(Array.isArray(unidades) ? unidades : []).map((u) => (
           <div 
             key={u.id} 
             onClick={() => setUnidadSeleccionada(u)}
